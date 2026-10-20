@@ -1,0 +1,8 @@
+@ApiService_HostAddress = http://localhost:5585
+
+# Stations within 5 miles of Westminster, nearest first.
+# The first request after startup can take ~30s while every UK forecourt is downloaded from gov.uk.
+GET {{ApiService_HostAddress}}/fuel-finder/near?latitude=51.5013&longitude=-0.1418&maxDistanceMiles=5
+Accept: application/json
+
+###

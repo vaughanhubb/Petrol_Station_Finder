@@ -1,0 +1,154 @@
+﻿@page "/"
+
+<PageTitle>Fuel Station Locator</PageTitle>
+
+@* Static page: search, sorting, filtering, export and the details modal are all driven by wwwroot/app.js *@
+
+<div class="page-shell">
+    <header class="app-header">
+        <div class="container">
+            <h1 class="app-title">Fuel Station Locator</h1>
+            <p class="app-subtitle mb-0">Find the best prices on petrol, diesel and other fuels near you, using live data from the gov.uk Fuel Finder API.</p>
+        </div>
+    </header>
+
+    <main class="container py-4">
+        <!-- Search Form -->
+        <div class="search-panel row g-3 align-items-start p-3 mt-0 mx-0 rounded border">
+            <div class="col-lg-6">
+                <label for="addressInput" class="form-label fw-bold">Enter Location</label>
+                <div class="input-group">
+                    <input type="text" id="addressInput" class="form-control" placeholder="e.g., 'SW1A 1AA' or 'London, UK'">
+                    <button onclick="updateLocation()" class="btn btn-outline-secondary">Update Location</button>
+                </div>
+                <div class="form-text small" id="locationStatus">Type an address or postcode (e.g., 'SW1A 1AA', 'London', '2 Cosgrove Crescent')</div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <label for="distance" class="form-label fw-bold">Search Distance</label>
+                <select id="distance" class="form-select">
+                    <option value="10">10 miles</option>
+                    <option value="20" selected>20 miles</option>
+                    <option value="50">50 miles</option>
+                    <option value="100">100 miles</option>
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <!-- Spacer label keeps the button level with the inputs beside it -->
+                <span class="form-label fw-bold d-none d-sm-block invisible" aria-hidden="true">Search</span>
+                <button onclick="submitData()" class="btn btn-primary w-100" id="submitBtn">Submit</button>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header results-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <h2 class="h5 mb-0">Search Results</h2>
+                    <!-- Disabled until there are results to export (enabled by app.js) -->
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="exportCsvBtn"
+                            title="Export results to CSV" aria-label="Export results to CSV" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <label for="pageSize" class="small mb-0">Rows per page</label>
+                    <select id="pageSize" class="form-select form-select-sm w-auto">
+                        <option value="15" selected>15</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0" id="stationsTable">
+                        <thead>
+                            <tr>
+                                <th data-sort="name" aria-sort="none"><button type="button" class="sort-btn">Station Name</button></th>
+                                <th data-sort="distance" aria-sort="ascending" class="text-end"><button type="button" class="sort-btn">Distance</button></th>
+                                <th data-sort="address" aria-sort="none"><button type="button" class="sort-btn">Address</button></th>
+                                <th data-sort="postcode" aria-sort="none"><button type="button" class="sort-btn">Postcode</button></th>
+                                <th data-sort="brand" aria-sort="none">
+                                    <span class="th-filter">
+                                        <button type="button" class="sort-btn">Brand</button>
+                                        <button type="button" class="filter-btn" id="brandFilterBtn" title="Filter by brand" aria-label="Filter by brand"
+                                                aria-haspopup="dialog" aria-expanded="false" aria-controls="brandFilterPanel" disabled>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                                <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/>
+                                            </svg>
+                                        </button>
+                                    </span>
+                                </th>
+                                <th data-sort="petrol" aria-sort="none" class="text-end"><button type="button" class="sort-btn">Petrol <span class="small fw-normal">(p/l)</span></button></th>
+                                <th data-sort="diesel" aria-sort="none" class="text-end"><button type="button" class="sort-btn">Diesel <span class="small fw-normal">(p/l)</span></button></th>
+                                <th>View Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stationsTableBody">
+                            <tr><td colspan="8" class="text-center text-body-secondary py-4">Enter location details and click Submit to find nearby fuel stations.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3" id="paginationBar" hidden>
+                    <div class="small text-body-secondary" id="pageInfo"></div>
+                    <nav aria-label="Results pages">
+                        <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <!-- Brand filter panel (positioned under the Brand header's filter button by app.js) -->
+        <div class="filter-panel card shadow" id="brandFilterPanel" role="dialog" aria-label="Filter by brand" hidden>
+            <div class="card-body p-2">
+                <input type="search" id="brandFilterSearch" class="form-control form-control-sm mb-2" placeholder="Search brands" aria-label="Search brands" autocomplete="off">
+                <div class="d-flex justify-content-between mb-1">
+                    <button type="button" class="btn btn-link btn-sm p-0" id="brandSelectAll">Select all</button>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="brandSelectNone">Select none</button>
+                </div>
+                <div class="filter-list" id="brandFilterList"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="container d-flex flex-wrap align-items-center justify-content-between gap-2 py-3">
+            <span class="small">
+                Prices from the <a href="https://www.gov.uk/guidance/access-the-latest-fuel-prices-and-forecourt-data-via-api-or-email" target="_blank" rel="noopener">gov.uk Fuel Finder API</a>
+                · Geocoding © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <label for="themeSelect" class="small mb-0">Theme</label>
+                <select id="themeSelect" class="form-select form-select-sm w-auto">
+                    <option value="auto">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Station details modal (filled in by app.js) -->
+<div class="modal fade" id="stationModal" tabindex="-1" aria-labelledby="stationModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
+        <div class="modal-content station-modal">
+            <div class="modal-header station-modal-header">
+                <div class="station-modal-heading">
+                    <h2 class="modal-title h4 mb-1" id="stationModalTitle"></h2>
+                    <div class="station-modal-subtitle small" id="stationModalSubtitle"></div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="stationModalBody"></div>
+            <div class="modal-footer justify-content-between">
+                <span class="small text-body-secondary" id="stationModalUpdated"></span>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-primary" id="stationModalMap" target="_blank" rel="noopener">View Location</a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

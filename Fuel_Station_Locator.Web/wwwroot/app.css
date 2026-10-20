@@ -1,0 +1,369 @@
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* ---- Theme tokens (light default, dark via Bootstrap's data-bs-theme) ---- */
+:root {
+    --page-side-bg: #dfe4ea;      /* empty area either side of the page */
+    --page-body-bg: #f8f9fb;      /* main page column */
+    --header-bg: #1b6ec2;
+    --header-fg: #ffffff;
+    --header-muted: rgba(255, 255, 255, 0.82);
+    --panel-bg: #ffffff;
+    --results-header-bg: #e7f0fa;
+    --results-header-fg: #0f3a66;
+    --footer-bg: #e9edf2;
+    --footer-fg: #3d4651;
+    --sort-active: #1b6ec2;
+}
+
+[data-bs-theme=dark] {
+    --page-side-bg: #0b0e12;
+    --page-body-bg: #161b22;
+    --header-bg: #0f2a47;
+    --header-fg: #e6edf3;
+    --header-muted: rgba(230, 237, 243, 0.75);
+    --panel-bg: #1e252e;
+    --results-header-bg: #1c3550;
+    --results-header-fg: #d6e6f7;
+    --footer-bg: #10151b;
+    --footer-fg: #aab4bf;
+    --sort-active: #6ea8fe;
+}
+
+body {
+    background-color: var(--page-side-bg);
+    min-height: 100vh;
+}
+
+.page-shell {
+    max-width: 1320px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--page-body-bg);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.12);
+}
+
+.page-shell > main {
+    flex: 1 0 auto;
+}
+
+.app-header {
+    background-color: var(--header-bg);
+    color: var(--header-fg);
+    padding: 1.5rem 0;
+}
+
+.app-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.app-subtitle {
+    color: var(--header-muted);
+}
+
+.search-panel {
+    background-color: var(--panel-bg);
+}
+
+.card {
+    background-color: var(--panel-bg);
+}
+
+.results-header {
+    background-color: var(--results-header-bg);
+    color: var(--results-header-fg);
+}
+
+.app-footer {
+    background-color: var(--footer-bg);
+    color: var(--footer-fg);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Keep text columns readable on narrow screens; the table scrolls inside .table-responsive instead */
+#stationsTable td:nth-child(1) { min-width: 10rem; }
+
+/* Address and Brand are cut off to one line so row height is set by Station Name; full text shows on hover */
+#stationsTable td.address-cell,
+#stationsTable td.brand-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#stationsTable td.address-cell {
+    max-width: 18rem;
+    min-width: 12rem;
+}
+
+#stationsTable td.brand-cell {
+    max-width: 9rem;
+}
+
+/* ---- Clickable station names ---- */
+.station-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-decoration-color: var(--bs-secondary-color);
+    text-underline-offset: 3px;
+}
+
+.station-link:hover {
+    color: var(--sort-active);
+    text-decoration: underline solid;
+}
+
+.station-link:focus-visible {
+    outline: 2px solid var(--sort-active);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ---- Station details modal ---- */
+.station-modal {
+    --bs-modal-bg: var(--page-body-bg);
+    border: 0;
+    overflow: hidden;
+}
+
+.station-modal-header {
+    background-color: var(--header-bg);
+    color: var(--header-fg);
+    border-bottom: 0;
+    align-items: flex-start;
+}
+
+.station-modal-heading {
+    min-width: 0;
+}
+
+.station-modal-subtitle {
+    color: var(--header-muted);
+}
+
+.detail-tile {
+    height: 100%;
+    padding: 1rem;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+}
+
+.detail-tile-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.75rem;
+}
+
+.detail-list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.4rem 1rem;
+    margin: 0;
+}
+
+.detail-list dt {
+    font-weight: 600;
+    color: var(--bs-secondary-color);
+}
+
+.detail-list dd {
+    margin: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.detail-table {
+    width: 100%;
+    margin: 0;
+}
+
+.detail-table th,
+.detail-table td {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.detail-table tr:last-child th,
+.detail-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.detail-table th {
+    font-weight: 600;
+}
+
+.detail-table .today th,
+.detail-table .today td {
+    color: var(--sort-active);
+    font-weight: 700;
+}
+
+.price-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.amenity-chip {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    margin: 0 0.4rem 0.4rem 0;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    background-color: var(--results-header-bg);
+    color: var(--results-header-fg);
+}
+
+/* ---- Brand column filter ---- */
+.th-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.filter-btn {
+    all: unset;
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.55;
+}
+
+.filter-btn:hover {
+    opacity: 1;
+}
+
+.filter-btn:focus-visible {
+    outline: 2px solid var(--sort-active);
+    outline-offset: 1px;
+}
+
+.filter-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+/* Filter is applied: show it in the accent colour */
+.filter-btn.active {
+    opacity: 1;
+    color: #fff;
+    background-color: var(--sort-active);
+}
+
+[data-bs-theme=dark] .filter-btn.active {
+    color: #0b0e12;
+}
+
+.filter-panel {
+    position: fixed;
+    z-index: 1050;
+    width: 290px;
+    max-width: calc(100vw - 16px);
+}
+
+.filter-list {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.filter-list .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.2rem 0.25rem;
+    border-radius: 4px;
+}
+
+.filter-list .form-check:hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+.filter-list .form-check-input {
+    margin: 0;
+    float: none;
+    flex-shrink: 0;
+}
+
+.filter-list .form-check-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.filter-list .brand-count {
+    color: var(--bs-secondary-color);
+    font-size: 0.8em;
+}
+
+/* ---- Sortable column headers ---- */
+.sort-btn {
+    all: unset;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sort-btn:focus-visible {
+    outline: 2px solid var(--sort-active);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.sort-btn::after {
+    content: "\2195"; /* ↕ */
+    margin-left: 0.3rem;
+    opacity: 0.35;
+    font-weight: normal;
+}
+
+th[aria-sort=ascending] .sort-btn,
+th[aria-sort=descending] .sort-btn {
+    color: var(--sort-active);
+}
+
+th[aria-sort=ascending] .sort-btn::after {
+    content: "\25B2"; /* ▲ */
+    opacity: 1;
+    font-size: 0.7em;
+}
+
+th[aria-sort=descending] .sort-btn::after {
+    content: "\25BC"; /* ▼ */
+    opacity: 1;
+    font-size: 0.7em;
+}
+
+a:not(.btn), .btn-link {
+    color: var(--bs-link-color);
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.btn:focus, .btn:active:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem var(--bs-body-bg), 0 0 0 0.25rem #258cfb;
+}
